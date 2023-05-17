@@ -70,6 +70,7 @@ public class ParallelSearchApp extends Application {
     }
 
     private void startSearch() {
+        // Method to use all the available CPUs when number of CPUs not specified.
         startSearch(Runtime.getRuntime().availableProcessors());
     }
 
@@ -83,7 +84,7 @@ public class ParallelSearchApp extends Application {
                 List<String> foundStrings = new ArrayList<>();
                 long startTime = System.currentTimeMillis();
 
-                try (ExecutorService executor = Executors.newFixedThreadPool(numCPUs)) {
+                try (ExecutorService executor = Executors.newWorkStealingPool(numCPUs)) {
 
                     int availableProcessors = Runtime.getRuntime().availableProcessors();
                     int usedCPUs = Math.min(numCPUs, availableProcessors);
@@ -96,20 +97,22 @@ public class ParallelSearchApp extends Application {
                             callables.add(() -> {
                                 Platform.runLater(() -> {
                                     foundStrings.add(str);
-                                    resultListView.setItems(FXCollections.observableArrayList(foundStrings));
                                 });
                                 return null;
                             });
                         }
                     }
                     executor.invokeAll(callables);
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 long endTime = System.currentTimeMillis();
                 long executionTime = endTime - startTime;
 
-                Platform.runLater(() -> statusLabel.setText("Execution Time: " + executionTime + " ms"));
+                Platform.runLater(() -> {
+                    statusLabel.setText("Execution Time: " + executionTime + " ms");
+                    resultListView.setItems(FXCollections.observableArrayList(foundStrings));
+                });
                 return foundStrings;
             }
 
