@@ -95,9 +95,7 @@ public class ParallelSearchApp extends Application {
                     for (String str : strings) {
                         if (str.toLowerCase().contains(searchText)) {
                             callables.add(() -> {
-                                Platform.runLater(() -> {
-                                    foundStrings.add(str);
-                                });
+                                Platform.runLater(() -> foundStrings.add(str));
                                 return null;
                             });
                         }
@@ -160,9 +158,7 @@ public class ParallelSearchApp extends Application {
             CSVReader reader = new CSVReader(new FileReader(filePath));
             String[] nextLine;
             while ((nextLine = reader.readNext()) != null) {
-                for (String cell : nextLine) {
-                    loadedStrings.add(cell);
-                }
+                Collections.addAll(loadedStrings, nextLine);
             }
             reader.close();
 
